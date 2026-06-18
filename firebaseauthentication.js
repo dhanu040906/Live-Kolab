@@ -1,16 +1,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
 import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-database.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyBIfFs_76KN0Mx6vLbeni8j2QIqEDfOOLE",
-  authDomain: "authentication-final-4e0cf.firebaseapp.com",
-  databaseURL: "https://authentication-final-4e0cf-default-rtdb.firebaseio.com/",
-  projectId: "authentication-final-4e0cf",
-  storageBucket: "authentication-final-4e0cf.firebasestorage.app",
-  messagingSenderId: "899696975212",
-  appId: "1:899696975212:web:3aa5337e8d6014de98a749"
-};
+import { firebaseConfig } from "./firebase-config.js";
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
@@ -33,7 +24,6 @@ submit.addEventListener("click", function(event) {
   createUserWithEmailAndPassword(auth, email, password)
     .then((userCredential) => {
       const user = userCredential.user;
-      // Save user details to Firebase database right after account creation
       savedata(user.uid, name, email);
     })
     .catch((error) => {
@@ -42,7 +32,6 @@ submit.addEventListener("click", function(event) {
 });
 
 function savedata(uid, name, email) {
-  // Store data under /users/{uid}/ so only the owner can access it
   const userRef = ref(database, 'users/' + uid);
 
   set(userRef, {

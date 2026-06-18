@@ -454,21 +454,16 @@
         }
     </script>
 
-    <script src="https://www.gstatic.com/firebasejs/11.1.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/11.1.0/firebase-auth-compat.js"></script>
-    <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyBIfFs_76KN0Mx6vLbeni8j2QIqEDfOOLE",
-            authDomain: "authentication-final-4e0cf.firebaseapp.com",
-            databaseURL: "https://authentication-final-4e0cf-default-rtdb.firebaseio.com/",
-            projectId: "authentication-final-4e0cf",
-            storageBucket: "authentication-final-4e0cf.firebasestorage.app",
-            messagingSenderId: "899696975212",
-            appId: "1:899696975212:web:3aa5337e8d6014de98a749"
-        };
-        firebase.initializeApp(firebaseConfig);
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
+        import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+        import { firebaseConfig } from "./firebase-config.js";
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
         document.getElementById('logout').addEventListener('click', () => {
-            firebase.auth().signOut().then(() => window.location.href = "loginpage.html");
+            signOut(auth).then(() => window.location.href = "loginpage.html");
         });
     </script>
 </body>

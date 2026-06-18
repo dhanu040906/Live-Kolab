@@ -4,80 +4,115 @@ A web-based data visualization platform that parses structured CSV data to produ
 
 ---
 
-## Features
+## ✨ Features
 
-- **CSV Parsing** — Upload any `.csv` file and the platform automatically reads headers and rows
+- **CSV Parsing** — Upload any `.csv` file; headers and rows are auto-detected
 - **Bar Chart** — Compare values across categories with per-bar dynamic HSL color coding and sort controls
 - **Pie Chart** — Visualize proportional data with evenly distributed color segments
 - **Column Selection** — Choose any column as X-axis (category) and Y-axis (value) via dropdown menus
-- **Smart Type Detection** — Automatically detects whether a column is numeric or categorical and applies the correct aggregation (sum vs. count)
+- **Smart Type Detection** — Auto-detects numeric vs categorical columns and applies the correct aggregation
 - **Filtering** — Filter rows by any column and value without re-uploading the file
 - **Sort Order** — Sort bar chart data ascending or descending (numeric and alphabetical)
-- **Firebase Authentication** — Secure email/password login and sign-up powered by Firebase Auth
-- **Responsive Design** — Sidebar + chart layout adapts to mobile and desktop screens
+- **Optional Firebase Auth** — Sign-up / login powered by Firebase Auth (the main dashboard works without login)
+- **Responsive Design** — Sidebar + chart layout adapts to mobile and desktop
 
 ---
 
-## Project Structure
+## 🚀 Quick Start — No Login Required
+
+> You can open the dashboard directly **without creating an account**.
+
+```bash
+# 1. Clone the repo
+git clone https://github.com/your-username/Live-kolab.git
+cd Live-kolab
+
+# 2. Set up Firebase credentials (required to run auth features)
+cp firebase-config.example.js firebase-config.js
+# Open firebase-config.js and paste your Firebase project values (see below)
+
+# 3. Serve locally (ES Modules require a local server — file:// URLs won't work)
+npx serve .
+# or
+python3 -m http.server 3000
+```
+
+Then open **[http://localhost:3000/mainpage.html](http://localhost:3000/mainpage.html)** — the dashboard loads directly, **no login needed**.
+
+---
+
+## 🔑 Firebase Setup (for Login / Sign-up features)
+
+The repo does **not** include any API keys. You need to supply your own Firebase credentials.
+
+### Steps
+
+1. Go to the [Firebase Console](https://console.firebase.google.com/) → your project → ⚙️ **Project Settings** → **Your apps** → **Web app**
+2. Copy the config object shown there
+3. In this repo, copy the example config file:
+   ```bash
+   cp firebase-config.example.js firebase-config.js
+   ```
+4. Open `firebase-config.js` and paste your values:
+   ```js
+   export const firebaseConfig = {
+     apiKey:            "AIza...",
+     authDomain:        "your-app.firebaseapp.com",
+     databaseURL:       "https://your-app-default-rtdb.firebaseio.com/",
+     projectId:         "your-app",
+     storageBucket:     "your-app.firebasestorage.app",
+     messagingSenderId: "123456789",
+     appId:             "1:123456789:web:abc..."
+   };
+   ```
+
+> ⚠️ `firebase-config.js` is listed in `.gitignore` — it will **never** be committed to Git.
+
+---
+
+## 📁 Project Structure
 
 ```
-Agglomeration/
+Live-kolab/
 │
-├── loginpage.html          # Login page
-├── loginpage.css           # Login page styles
-├── loginpage.js            # Firebase login logic (ES Module)
+├── mainpage.html              # Dashboard — open this directly, no login needed
+├── bargraph.html              # Interactive bar chart
+├── piechart.html              # Interactive pie chart
+├── about.html                 # About page
 │
-├── signinpage.html         # Sign-up page
-├── signinpage.css          # Sign-up page styles
-├── firebaseauthentication.js  # Firebase sign-up logic (ES Module)
+├── loginpage.html             # Login page (optional)
+├── loginpage.css
+├── loginpage.js               # Firebase login logic (imports from firebase-config.js)
 │
-├── mainpage.html           # Dashboard — choose chart type
-├── bargraph.html           # Bar chart page
-├── piechart.html           # Pie chart page
-├── about.html              # About page
+├── signinpage.html            # Sign-up page (optional)
+├── signinpage.css
+├── firebaseauthentication.js  # Firebase sign-up logic (imports from firebase-config.js)
 │
-├── students.csv            # Sample CSV — student data
-├── population.csv          # Sample CSV — population data
-├── Countries_Population.csv  # Sample CSV — country population data
+├── firebase-config.js         # ← YOUR real keys go here (gitignored, never committed)
+├── firebase-config.example.js # ← Safe template committed to the repo
 │
+├── students.csv               # Sample CSV — student data
+├── population.csv             # Sample CSV — population data
+├── Countries_Population.csv   # Sample CSV — country population data
+│
+├── .gitignore                 # Prevents firebase-config.js and .env from being committed
 └── README.md
 ```
 
 ---
 
-## Getting Started
+## 🗂️ Usage
 
-> **Important:** The login and sign-up pages use ES Modules (`import`/`export`). Browsers block ES Modules when opening HTML directly as a `file:///` URL. You **must** serve the project through a local server.
-
-### Run locally
-
-```bash
-# Using npx serve (recommended)
-npx serve .
-
-# Or using Python
-python3 -m http.server 3000
-```
-
-Then open **[http://localhost:3000/loginpage.html](http://localhost:3000/loginpage.html)** in your browser.
+1. **Open the dashboard** — Navigate to `mainpage.html` (no login required)
+2. **Choose a chart type** — Select Bar Chart or Pie Chart
+3. **Upload CSV** — Click "Choose File" and upload any `.csv` file
+4. **Configure** — Select your X-axis (category) and Y-axis (value) columns
+5. **Filter** *(optional)* — Pick a filter column and enter a value to narrow results
+6. **Generate** — Click "Generate Chart" to render the visualization
 
 ---
 
-## Usage
-
-1. **Sign up** — Create an account on the Sign Up page
-2. **Log in** — Sign in with your email and password
-3. **Choose chart type** — Select Bar Chart or Pie Chart from the dashboard
-4. **Upload CSV** — Click "Choose File" and upload any `.csv` file
-5. **Configure** — Select your X-axis (category) and Y-axis (value) columns
-6. **Filter** *(optional)* — Pick a filter column and enter a value to narrow down the data
-7. **Generate** — Click "Generate Chart" to render the visualization
-
----
-
-## Sample CSV Files
-
-The repo includes three ready-to-use sample files:
+## 📊 Sample CSV Files
 
 | File | Contents |
 |---|---|
@@ -87,33 +122,33 @@ The repo includes three ready-to-use sample files:
 
 ---
 
-## Tech Stack
+## 🛠️ Tech Stack
 
 | Layer | Technology |
 |---|---|
 | Frontend | HTML5, CSS3, Vanilla JavaScript |
 | Charts | [Chart.js](https://www.chartjs.org/) via CDN |
-| Authentication | [Firebase Auth](https://firebase.google.com/products/auth) |
+| Authentication | [Firebase Auth](https://firebase.google.com/products/auth) (optional) |
 | Database | Firebase Realtime Database |
 | Fonts | Google Fonts — Inter |
 
 ---
 
-## Pages Overview
+## 🔒 Security Notes
 
-| Page | Route | Description |
-|---|---|---|
-| Login | `loginpage.html` | Email/password sign-in |
-| Sign Up | `signinpage.html` | Create a new account |
-| Dashboard | `mainpage.html` | Choose between Bar or Pie chart |
-| Bar Chart | `bargraph.html` | Interactive bar chart with filter & sort |
-| Pie Chart | `piechart.html` | Interactive pie chart with filter |
-| About | `about.html` | Platform overview and feature list |
+- **API keys are never hardcoded** in committed files. The `firebase-config.js` file (with real credentials) is in `.gitignore`.
+- Firebase web API keys are client-side by design, but protect your app with [Firebase Security Rules](https://firebase.google.com/docs/rules) to restrict database access.
+- You can also restrict your API key to specific domains in [Google Cloud Console → APIs & Credentials](https://console.cloud.google.com/apis/credentials).
 
 ---
 
-## Notes
+## 📄 Pages Overview
 
-- All pages require authentication. After logging out, the user is redirected to the login page.
-- Comma-formatted numbers (e.g. `1,000,000`) in CSV files are handled correctly during numeric parsing.
-- Rows with mismatched column counts are automatically skipped during CSV parsing.
+| Page | File | Description |
+|---|---|---|
+| **Dashboard** | `mainpage.html` | Choose Bar or Pie chart — opens directly |
+| **Bar Chart** | `bargraph.html` | Interactive bar chart with filter & sort |
+| **Pie Chart** | `piechart.html` | Interactive pie chart with filter |
+| **About** | `about.html` | Platform overview and feature list |
+| Login | `loginpage.html` | Email/password sign-in (optional) |
+| Sign Up | `signinpage.html` | Create a new account (optional) |

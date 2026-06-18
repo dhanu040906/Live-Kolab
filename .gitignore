@@ -1,0 +1,19 @@
+# ── Firebase credentials ──────────────────────────────────────────────────────
+# firebase-config.js holds real API keys and is NEVER committed.
+# Copy firebase-config.example.js → firebase-config.js and fill in your own values.
+firebase-config.js
+
+# ── Environment files ─────────────────────────────────────────────────────────
+.env
+.env.local
+.env.*.local
+
+# ── OS / editor junk ──────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# ── Logs ─────────────────────────────────────────────────────────────────────
+*.log
+npm-debug.log*
