@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Livekolab — Bar Chart</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: skyblue;
+            color: #1a1a1a;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ── NAV ── */
+        nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 40px;
+            height: 64px;
+            background: #333;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-brand {
+            font-size: 18px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .nav-links { display: flex; gap: 8px; align-items: center; }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #ccc;
+            font-size: 14px;
+            font-weight: 500;
+            padding: 7px 14px;
+            border-radius: 8px;
+            transition: color 0.2s, background 0.2s;
+        }
+
+        .nav-links a:hover { color: #fff; background: rgba(255,255,255,0.12); }
+        .nav-links a.active { color: #fff; background: rgba(255,255,255,0.18); }
+
+        .nav-logout {
+            background: rgba(239,68,68,0.2);
+            border: 1px solid rgba(239,68,68,0.4);
+            color: #ff7070 !important;
+            cursor: pointer;
+        }
+
+        .nav-logout:hover { background: rgba(239,68,68,0.35) !important; }
+
+        /* ── LAYOUT ── */
+        .app-layout {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            height: calc(100vh - 64px);
+        }
+
+        /* ── SIDEBAR ── */
+        .sidebar {
+            background: goldenrod;
+            border-right: 1px solid rgba(0,0,0,0.1);
+            padding: 28px 24px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .sidebar-header h2 { font-size: 16px; font-weight: 600; color: #1a1a1a; margin-bottom: 4px; }
+        .sidebar-header p { font-size: 12px; color: #555; }
+
+        .divider { height: 1px; background: rgba(0,0,0,0.15); }
+
+        .control-group { display: flex; flex-direction: column; gap: 6px; }
+
+        .control-group label {
+            font-size: 11px;
+            font-weight: 700;
+            color: #333;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+        }
+
+        .control-group select,
+        .control-group input[type="text"],
+        .control-group input[type="file"] {
+            width: 100%;
+            padding: 10px 12px;
+            background: #fff;
+            border: 1px solid rgba(0,0,0,0.2);
+            border-radius: 10px;
+            color: #333;
+            font-size: 13px;
+            font-family: 'Inter', sans-serif;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            appearance: none;
+            -webkit-appearance: none;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+
+        .control-group select:focus,
+        .control-group input[type="text"]:focus {
+            border-color: #ff5722;
+            box-shadow: 0 0 0 3px rgba(255, 87, 34, 0.2);
+        }
+
+        .control-group input::placeholder { color: #aaa; }
+
+        .control-group input[type="file"] {
+            cursor: pointer;
+            color: #555;
+            padding: 9px 12px;
+        }
+
+        .control-group input[type="file"]::-webkit-file-upload-button {
+            background: rgba(255, 87, 34, 0.15);
+            border: 1px solid rgba(255, 87, 34, 0.4);
+            color: #e64a19;
+            padding: 5px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-right: 10px;
+        }
+
+        .control-group input[type="file"]::-webkit-file-upload-button:hover {
+            background: rgba(255, 87, 34, 0.25);
+        }
+
+        .select-wrapper { position: relative; }
+
+        .select-wrapper::after {
+            content: '▾';
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #888;
+            font-size: 12px;
+            pointer-events: none;
+        }
+
+        .update-btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #ff5722, #ff758c);
+            border: none;
+            border-radius: 12px;
+            color: #fff;
+            font-size: 14px;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(255, 87, 34, 0.4);
+            transition: transform 0.15s, box-shadow 0.15s;
+            letter-spacing: 0.2px;
+            margin-top: 4px;
+        }
+
+        .update-btn:hover {
+            background: linear-gradient(135deg, #e64a19, #ff5722);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 28px rgba(255, 87, 34, 0.5);
+        }
+
+        .update-btn:active { transform: translateY(0); }
+
+        /* ── CHART AREA ── */
+        .chart-area {
+            display: flex;
+            flex-direction: column;
+            padding: 32px;
+            overflow: hidden;
+        }
+
+        .chart-title { font-size: 20px; font-weight: 700; color: #1a1a1a; margin-bottom: 4px; letter-spacing: -0.3px; }
+        .chart-subtitle { font-size: 13px; color: #555; margin-bottom: 24px; }
+
+        .chart-box {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
+            padding: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        .chart-box canvas { max-height: 100%; }
+
+        .empty-state { display: flex; flex-direction: column; align-items: center; gap: 12px; color: #aaa; }
+        .empty-state .icon { font-size: 48px; opacity: 0.5; }
+        .empty-state p { font-size: 14px; }
+
+        @media (max-width: 900px) {
+            .app-layout { grid-template-columns: 1fr; grid-template-rows: auto 1fr; height: auto; }
+            .sidebar { border-right: none; border-bottom: 1px solid rgba(0,0,0,0.1); }
+            .chart-area { min-height: 400px; }
+        }
+
+        @media (max-width: 600px) {
+            nav { padding: 0 20px; }
+            .chart-area, .sidebar { padding: 20px 16px; }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <span class="nav-brand">Livekolab</span>
+        <div class="nav-links">
+            <a href="mainpage.html">Home</a>
+            <a href="bargraph.html" class="active">Bar Chart</a>
+            <a href="piechart.html">Pie Chart</a>
+            <a href="about.html">About</a>
+            <a href="#" id="logout" class="nav-logout">Logout</a>
+        </div>
+    </nav>
+
+    <div class="app-layout">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>Bar Chart</h2>
+                <p>Upload a CSV and configure your chart</p>
+            </div>
+            <div class="divider"></div>
+
+            <div class="control-group">
+                <label>CSV File</label>
+                <input type="file" id="csvFileInput" accept=".csv">
+            </div>
+
+            <div class="control-group">
+                <label>X-Axis (Category)</label>
+                <div class="select-wrapper">
+                    <select id="xAxisSelect"></select>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label>Y-Axis (Value)</label>
+                <div class="select-wrapper">
+                    <select id="valueSelect"></select>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="control-group">
+                <label>Filter Column</label>
+                <div class="select-wrapper">
+                    <select id="filterColumn"></select>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label>Filter Value</label>
+                <input type="text" id="filterValue" placeholder="Leave blank for all rows">
+            </div>
+
+            <div class="control-group">
+                <label>Sort Order</label>
+                <div class="select-wrapper">
+                    <select id="sortOrder">
+                        <option value="asc">Ascending</option>
+                        <option value="desc">Descending</option>
+                    </select>
+                </div>
+            </div>
+
+            <button class="update-btn" id="updateGraph">Generate Chart</button>
+        </aside>
+
+        <main class="chart-area">
+            <div class="chart-title">Bar Chart Analysis</div>
+            <div class="chart-subtitle">Upload a CSV file and press "Generate Chart" to begin</div>
+            <div class="chart-box">
+                <div class="empty-state" id="emptyState">
+                    <div class="icon">📂</div>
+                    <p>No data loaded yet</p>
+                </div>
+                <canvas id="myChart" style="display:none;"></canvas>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const csvFileInput = document.getElementById('csvFileInput');
+        const chartCanvas = document.getElementById('myChart');
+        const emptyState = document.getElementById('emptyState');
+        const xAxisSelect = document.getElementById('xAxisSelect');
+        const valueSelect = document.getElementById('valueSelect');
+        const filterColumnSelect = document.getElementById('filterColumn');
+        const filterValueInput = document.getElementById('filterValue');
+        const updateGraphButton = document.getElementById('updateGraph');
+        const sortOrderSelect = document.getElementById('sortOrder');
+        let myChart;
+        let csvData;
+
+        csvFileInput.addEventListener('change', handleFileSelect);
+        updateGraphButton.addEventListener('click', updateGraph);
+
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    csvData = parseCSV(e.target.result);
+                    if (csvData) {
+                        populateDropdowns(csvData.headers);
+                        updateGraph();
+                    } else {
+                        alert("Error parsing CSV. Please check the file format.");
+                    }
+                };
+                reader.readAsText(file);
+            }
+        }
+
+        function parseCSV(csvText) {
+            const lines = csvText.split('\n').filter(line => line.trim() !== "");
+            if (lines.length <= 1) return null;
+            const headers = lines[0].split(',').map(h => h.trim());
+            const data = [];
+            for (let i = 1; i < lines.length; i++) {
+                const values = lines[i].split(',').map(v => v.trim());
+                if (values.length !== headers.length) continue;
+                const entry = {};
+                for (let j = 0; j < headers.length; j++) entry[headers[j]] = values[j];
+                data.push(entry);
+            }
+            return { headers, data };
+        }
+
+        function populateDropdowns(headers) {
+            [xAxisSelect, valueSelect, filterColumnSelect].forEach(sel => sel.innerHTML = '');
+            headers.forEach(header => {
+                [xAxisSelect, valueSelect, filterColumnSelect].forEach(sel => {
+                    const opt = document.createElement('option');
+                    opt.value = opt.text = header;
+                    sel.appendChild(opt);
+                });
+            });
+        }
+
+        function updateGraph() {
+            if (!csvData) return;
+
+            const xAxisColumn = xAxisSelect.value;
+            const valueColumn = valueSelect.value;
+            const filterColumn = filterColumnSelect.value;
+            const filterValue = filterValueInput.value.trim().toLowerCase();
+            const sortOrder = sortOrderSelect.value;
+
+            let filteredData = csvData.data;
+            if (filterValue && filterColumn) {
+                filteredData = csvData.data.filter(row =>
+                    row[filterColumn].toLowerCase().includes(filterValue)
+                );
+            }
+
+            const xValues = filteredData.map(row => row[xAxisColumn]);
+            const yValues = filteredData.map(row => row[valueColumn]);
+            const valueCounts = {};
+            xValues.forEach((xValue, index) => {
+                if (!valueCounts[xValue]) valueCounts[xValue] = [];
+                valueCounts[xValue].push(yValues[index]);
+            });
+
+            let labels = Object.keys(valueCounts);
+            let data = labels.map(label => {
+                const values = valueCounts[label];
+                return values.every(val => !isNaN(Number(val)))
+                    ? values.reduce((sum, val) => sum + Number(val), 0)
+                    : values.length;
+            });
+
+            const combined = labels.map((label, index) => ({ label, value: data[index] }));
+            if (labels.every(label => !isNaN(Number(label)))) {
+                combined.sort((a, b) => sortOrder === 'asc'
+                    ? parseInt(a.label) - parseInt(b.label)
+                    : parseInt(b.label) - parseInt(a.label));
+            } else {
+                combined.sort((a, b) => sortOrder === 'asc'
+                    ? a.label.localeCompare(b.label)
+                    : b.label.localeCompare(a.label));
+            }
+
+            labels = combined.map(item => item.label);
+            data = combined.map(item => item.value);
+
+            const backgroundColors = labels.map((_, i) => `hsl(${(i * 360 / labels.length) % 360}, 70%, 58%)`);
+            const borderColors = labels.map((_, i) => `hsl(${(i * 360 / labels.length) % 360}, 70%, 40%)`);
+
+            if (myChart) myChart.destroy();
+            emptyState.style.display = 'none';
+            chartCanvas.style.display = 'block';
+
+            myChart = new Chart(chartCanvas, {
+                type: 'bar',
+                data: {
+                    labels,
+                    datasets: [{
+                        label: valueColumn,
+                        data,
+                        backgroundColor: backgroundColors,
+                        borderColor: borderColors,
+                        borderWidth: 1,
+                        borderRadius: 6,
+                        borderSkipped: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { labels: { color: '#333', font: { family: 'Inter', size: 12 } } },
+                        tooltip: {
+                            callbacks: { label: item => `${item.dataset.label}: ${item.raw}` }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: { color: '#555', font: { family: 'Inter', size: 11 }, autoSkip: false },
+                            grid: { color: 'rgba(0,0,0,0.05)' }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            ticks: { color: '#555', font: { family: 'Inter', size: 11 } },
+                            grid: { color: 'rgba(0,0,0,0.05)' }
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+
+    <script src="https://www.gstatic.com/firebasejs/11.1.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.1.0/firebase-auth-compat.js"></script>
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBIfFs_76KN0Mx6vLbeni8j2QIqEDfOOLE",
+            authDomain: "authentication-final-4e0cf.firebaseapp.com",
+            databaseURL: "https://authentication-final-4e0cf-default-rtdb.firebaseio.com/",
+            projectId: "authentication-final-4e0cf",
+            storageBucket: "authentication-final-4e0cf.firebasestorage.app",
+            messagingSenderId: "899696975212",
+            appId: "1:899696975212:web:3aa5337e8d6014de98a749"
+        };
+        firebase.initializeApp(firebaseConfig);
+        document.getElementById('logout').addEventListener('click', () => {
+            firebase.auth().signOut().then(() => window.location.href = "loginpage.html");
+        });
+    </script>
+</body>
+</html>

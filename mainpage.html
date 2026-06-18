@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Livekolab — Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f8e10f, #30fc25);
+            color: #1a1a1a;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ── NAV ── */
+        nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 40px;
+            height: 64px;
+            background: #333;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-brand {
+            font-size: 18px;
+            font-weight: 700;
+            color: #fff;
+            letter-spacing: -0.3px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #ccc;
+            font-size: 14px;
+            font-weight: 500;
+            padding: 7px 14px;
+            border-radius: 8px;
+            transition: color 0.2s, background 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.12);
+        }
+
+        .nav-links a.active {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.18);
+        }
+
+        .nav-logout {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid rgba(239, 68, 68, 0.4);
+            color: #ff7070 !important;
+            cursor: pointer;
+        }
+
+        .nav-logout:hover {
+            background: rgba(239, 68, 68, 0.35) !important;
+            color: #fca5a5 !important;
+        }
+
+        /* ── HERO ── */
+        .hero {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 80px 40px;
+            text-align: center;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(0, 0, 0, 0.15);
+            color: #333;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 5px 14px;
+            border-radius: 999px;
+            margin-bottom: 24px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .hero h1 {
+            font-size: clamp(36px, 5vw, 56px);
+            font-weight: 700;
+            letter-spacing: -1.5px;
+            line-height: 1.1;
+            margin-bottom: 18px;
+            color: #1a1a1a;
+        }
+
+        .hero p {
+            font-size: 17px;
+            color: #333;
+            max-width: 440px;
+            line-height: 1.7;
+            margin-bottom: 52px;
+        }
+
+        /* ── CHART CARDS ── */
+        .card-grid {
+            display: flex;
+            gap: 24px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .chart-card {
+            position: relative;
+            background: rgba(255, 255, 255, 0.55);
+            border: 1px solid rgba(255, 255, 255, 0.7);
+            border-radius: 20px;
+            padding: 36px 32px;
+            width: 240px;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .chart-card:hover {
+            transform: translateY(-6px);
+            border-color: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 20px 48px rgba(0, 0, 0, 0.15);
+        }
+
+
+
+        .chart-card h3 {
+            font-size: 17px;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 8px;
+        }
+
+        .chart-card p {
+            font-size: 13px;
+            color: #555;
+            line-height: 1.6;
+        }
+
+        .card-arrow {
+            position: absolute;
+            bottom: 20px;
+            right: 24px;
+            font-size: 18px;
+            color: #aaa;
+            transition: color 0.2s, transform 0.2s;
+        }
+
+        .chart-card:hover .card-arrow {
+            color: #ff5722;
+            transform: translate(3px, -3px);
+        }
+
+        @media (max-width: 600px) {
+            nav {
+                padding: 0 20px;
+            }
+
+            .hero {
+                padding: 60px 20px;
+            }
+
+            .chart-card {
+                width: 100%;
+                max-width: 300px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <nav>
+        <span class="nav-brand">Livekolab</span>
+        <div class="nav-links">
+            <a href="mainpage.html" class="active">Home</a>
+            <a href="about.html">About</a>
+            <a href="#" id="logout" class="nav-logout">Logout</a>
+        </div>
+    </nav>
+
+    <div class="hero">
+        <h1>Turn your CSV<br>into clarity</h1>
+        <p>Upload any CSV file and instantly generate interactive charts to explore, filter, and understand your data.
+        </p>
+
+        <div class="card-grid">
+            <a href="bargraph.html" class="chart-card bar">
+                <h3>Bar Chart</h3>
+                <p>Compare values across categories with adaptive, color-coded bars.</p>
+                <span class="card-arrow">↗</span>
+            </a>
+            <a href="piechart.html" class="chart-card pie">
+                <h3>Pie Chart</h3>
+                <p>Visualize proportional data across segments with dynamic color schemes.</p>
+                <span class="card-arrow">↗</span>
+            </a>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/11.1.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.1.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.1.0/firebase-database-compat.js"></script>
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBIfFs_76KN0Mx6vLbeni8j2QIqEDfOOLE",
+            authDomain: "authentication-final-4e0cf.firebaseapp.com",
+            databaseURL: "https://authentication-final-4e0cf-default-rtdb.firebaseio.com/",
+            projectId: "authentication-final-4e0cf",
+            storageBucket: "authentication-final-4e0cf.firebasestorage.app",
+            messagingSenderId: "899696975212",
+            appId: "1:899696975212:web:3aa5337e8d6014de98a749"
+        };
+        firebase.initializeApp(firebaseConfig);
+        function logout() {
+            firebase.auth().signOut().then(() => window.location.href = "loginpage.html")
+                .catch(() => alert("Logout failed"));
+        }
+        document.getElementById('logout').addEventListener('click', logout);
+    </script>
+</body>
+
+</html>

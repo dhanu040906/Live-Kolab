@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Livekolab — Pie Chart</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: gray;
+            color: #1a1a1a;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 40px;
+            height: 64px;
+            background: #333;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-brand { font-size: 18px; font-weight: 700; color: #fff; }
+
+        .nav-links { display: flex; gap: 8px; align-items: center; }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #ccc;
+            font-size: 14px;
+            font-weight: 500;
+            padding: 7px 14px;
+            border-radius: 8px;
+            transition: color 0.2s, background 0.2s;
+        }
+
+        .nav-links a:hover { color: #fff; background: rgba(255,255,255,0.12); }
+        .nav-links a.active { color: #fff; background: rgba(255,255,255,0.18); }
+
+        .nav-logout {
+            background: rgba(239,68,68,0.2);
+            border: 1px solid rgba(239,68,68,0.4);
+            color: #ff7070 !important;
+            cursor: pointer;
+        }
+
+        .nav-logout:hover { background: rgba(239,68,68,0.35) !important; }
+
+        .app-layout {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            height: calc(100vh - 64px);
+        }
+
+        .sidebar {
+            background: #fff;
+            border-right: 1px solid rgba(0,0,0,0.1);
+            padding: 28px 24px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.08);
+        }
+
+        .sidebar-header h2 { font-size: 16px; font-weight: 600; color: #1a1a1a; margin-bottom: 4px; }
+        .sidebar-header p { font-size: 12px; color: #777; }
+
+        .divider { height: 1px; background: rgba(0,0,0,0.1); }
+
+        .control-group { display: flex; flex-direction: column; gap: 6px; }
+
+        .control-group label {
+            font-size: 11px;
+            font-weight: 700;
+            color: #555;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+        }
+
+        .control-group select,
+        .control-group input[type="text"],
+        .control-group input[type="file"] {
+            width: 100%;
+            padding: 10px 12px;
+            background: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            color: #333;
+            font-size: 13px;
+            font-family: 'Inter', sans-serif;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            appearance: none;
+            -webkit-appearance: none;
+        }
+
+        .control-group select:focus,
+        .control-group input[type="text"]:focus {
+            border-color: #6a89cc;
+            box-shadow: 0 0 0 3px rgba(106, 137, 204, 0.2);
+        }
+
+        .control-group input::placeholder { color: #bbb; }
+
+        .control-group input[type="file"] {
+            cursor: pointer;
+            color: #777;
+            padding: 9px 12px;
+        }
+
+        .control-group input[type="file"]::-webkit-file-upload-button {
+            background: rgba(106,137,204,0.15);
+            border: 1px solid rgba(106,137,204,0.4);
+            color: #4a69bd;
+            padding: 5px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-right: 10px;
+        }
+
+        .control-group input[type="file"]::-webkit-file-upload-button:hover {
+            background: rgba(106,137,204,0.25);
+        }
+
+        .select-wrapper { position: relative; }
+
+        .select-wrapper::after {
+            content: '▾';
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #aaa;
+            font-size: 12px;
+            pointer-events: none;
+        }
+
+        .update-btn {
+            width: 100%;
+            padding: 12px;
+            background-color: #6a89cc;
+            border: none;
+            border-radius: 12px;
+            color: #fff;
+            font-size: 14px;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(106,137,204,0.4);
+            transition: transform 0.15s, box-shadow 0.15s, background-color 0.2s;
+            letter-spacing: 0.2px;
+            margin-top: 4px;
+        }
+
+        .update-btn:hover {
+            background-color: #4a69bd;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 28px rgba(106,137,204,0.5);
+        }
+
+        .update-btn:active { transform: translateY(0); }
+
+        .chart-area {
+            display: flex;
+            flex-direction: column;
+            padding: 32px;
+            overflow: hidden;
+        }
+
+        .chart-title { font-size: 20px; font-weight: 700; color: #fff; margin-bottom: 4px; letter-spacing: -0.3px; text-shadow: 0 1px 3px rgba(0,0,0,0.3); }
+        .chart-subtitle { font-size: 13px; color: rgba(255,255,255,0.75); margin-bottom: 24px; }
+
+        .chart-box {
+            flex: 1;
+            background: rgba(255,255,255,0.9);
+            border: 1px solid rgba(255,255,255,0.95);
+            border-radius: 20px;
+            padding: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+        }
+
+        .empty-state { display: flex; flex-direction: column; align-items: center; gap: 12px; color: #ccc; }
+        .empty-state .icon { font-size: 48px; opacity: 0.5; }
+        .empty-state p { font-size: 14px; color: #aaa; }
+
+        @media (max-width: 900px) {
+            .app-layout { grid-template-columns: 1fr; grid-template-rows: auto 1fr; height: auto; }
+            .sidebar { border-right: none; border-bottom: 1px solid #eee; }
+            .chart-area { min-height: 400px; }
+        }
+
+        @media (max-width: 600px) {
+            nav { padding: 0 20px; }
+            .chart-area, .sidebar { padding: 20px 16px; }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <span class="nav-brand">Livekolab</span>
+        <div class="nav-links">
+            <a href="mainpage.html">Home</a>
+            <a href="bargraph.html">Bar Chart</a>
+            <a href="piechart.html" class="active">Pie Chart</a>
+            <a href="about.html">About</a>
+            <a href="#" id="logout" class="nav-logout">Logout</a>
+        </div>
+    </nav>
+
+    <div class="app-layout">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>Pie Chart</h2>
+                <p>Upload a CSV and configure your chart</p>
+            </div>
+            <div class="divider"></div>
+
+            <div class="control-group">
+                <label>CSV File</label>
+                <input type="file" id="csvFileInput" accept=".csv">
+            </div>
+
+            <div class="control-group">
+                <label>Category Field</label>
+                <div class="select-wrapper">
+                    <select id="xAxisSelect"></select>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label>Quantity Field</label>
+                <div class="select-wrapper">
+                    <select id="quantitySelect"></select>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="control-group">
+                <label>Filter Column</label>
+                <div class="select-wrapper">
+                    <select id="filterColumn"></select>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label>Filter Value</label>
+                <input type="text" id="filterValue" placeholder="Leave blank for all rows">
+            </div>
+
+            <button class="update-btn" id="updateGraph">Generate Chart</button>
+        </aside>
+
+        <main class="chart-area">
+            <div class="chart-title">Pie Chart Analysis</div>
+            <div class="chart-subtitle">Upload a CSV file and press "Generate Chart" to begin</div>
+            <div class="chart-box">
+                <div class="empty-state" id="emptyState">
+                    <div class="icon">📂</div>
+                    <p>No data loaded yet</p>
+                </div>
+                <canvas id="myChart" style="display:none; max-height:100%;"></canvas>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const csvFileInput = document.getElementById('csvFileInput');
+        const xAxisSelect = document.getElementById('xAxisSelect');
+        const quantitySelect = document.getElementById('quantitySelect');
+        const filterColumnSelect = document.getElementById('filterColumn');
+        const filterValueInput = document.getElementById('filterValue');
+        const updateGraphButton = document.getElementById('updateGraph');
+        const chartCanvas = document.getElementById('myChart');
+        const emptyState = document.getElementById('emptyState');
+        let myChart;
+        let csvData;
+
+        csvFileInput.addEventListener('change', handleFileSelect);
+        updateGraphButton.addEventListener('click', updateGraph);
+
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    csvData = parseCSV(e.target.result);
+                    if (csvData) {
+                        populateDropdowns(csvData.headers);
+                    } else {
+                        alert("Error parsing CSV. Please check the file format.");
+                    }
+                };
+                reader.readAsText(file);
+            }
+        }
+
+        function parseCSV(csvText) {
+            const lines = csvText.split('\n').filter(line => line.trim() !== "");
+            if (lines.length <= 1) return null;
+            const headers = lines[0].split(',').map(h => h.trim());
+            const data = [];
+            for (let i = 1; i < lines.length; i++) {
+                const values = lines[i].split(',').map(v => v.trim());
+                if (values.length !== headers.length) continue;
+                const entry = {};
+                for (let j = 0; j < headers.length; j++) entry[headers[j]] = values[j];
+                data.push(entry);
+            }
+            return { headers, data };
+        }
+
+        function populateDropdowns(headers) {
+            [xAxisSelect, quantitySelect, filterColumnSelect].forEach(sel => sel.innerHTML = '');
+            headers.forEach(header => {
+                [xAxisSelect, quantitySelect, filterColumnSelect].forEach(sel => {
+                    const opt = document.createElement('option');
+                    opt.value = opt.text = header;
+                    sel.appendChild(opt);
+                });
+            });
+        }
+
+        function updateGraph() {
+            if (!csvData) { alert("Please upload a CSV file."); return; }
+
+            const xAxisColumn = xAxisSelect.value;
+            const quantityColumn = quantitySelect.value;
+            const filterColumn = filterColumnSelect.value;
+            const filterValue = filterValueInput.value.trim().toLowerCase();
+
+            if (!xAxisColumn || !quantityColumn) { alert("Please select fields to analyze."); return; }
+
+            let filteredData = csvData.data;
+            if (filterValue && filterColumn) {
+                filteredData = csvData.data.filter(row =>
+                    row[filterColumn] && row[filterColumn].toLowerCase().includes(filterValue)
+                );
+            }
+
+            if (filteredData.length === 0) { alert("No rows match the filter."); return; }
+
+            const sampleValues = filteredData.map(row => row[quantityColumn]).filter(v => v !== undefined && v !== '');
+            const isNumeric = sampleValues.length > 0 && sampleValues.every(v => !isNaN(Number(v.replace(/,/g, ''))));
+
+            const valueCounts = {};
+            filteredData.forEach(row => {
+                const xValue = row[xAxisColumn];
+                if (xValue === undefined || xValue === '') return;
+                if (!valueCounts[xValue]) valueCounts[xValue] = 0;
+                if (isNumeric) {
+                    const numVal = Number((row[quantityColumn] || '0').replace(/,/g, ''));
+                    valueCounts[xValue] += isNaN(numVal) ? 0 : numVal;
+                } else {
+                    valueCounts[xValue] += 1;
+                }
+            });
+
+            const labels = Object.keys(valueCounts);
+            const data = labels.map(label => valueCounts[label]);
+            const backgroundColors = labels.map((_, i) => `hsl(${(i * 360 / labels.length) % 360}, 70%, 70%)`);
+
+            if (myChart) myChart.destroy();
+            emptyState.style.display = 'none';
+            chartCanvas.style.display = 'block';
+
+            myChart = new Chart(chartCanvas, {
+                type: 'pie',
+                data: {
+                    labels,
+                    datasets: [{
+                        label: quantityColumn,
+                        data,
+                        backgroundColor: backgroundColors,
+                        borderColor: 'rgba(255, 255, 255, 1)',
+                        borderWidth: 2,
+                        hoverOffset: 10
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { color: '#333', font: { family: 'Inter', size: 12 }, padding: 16 }
+                        },
+                        tooltip: {
+                            callbacks: { label: item => ` ${item.label}: ${item.raw}` }
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+
+    <script src="https://www.gstatic.com/firebasejs/11.1.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.1.0/firebase-auth-compat.js"></script>
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBIfFs_76KN0Mx6vLbeni8j2QIqEDfOOLE",
+            authDomain: "authentication-final-4e0cf.firebaseapp.com",
+            databaseURL: "https://authentication-final-4e0cf-default-rtdb.firebaseio.com/",
+            projectId: "authentication-final-4e0cf",
+            storageBucket: "authentication-final-4e0cf.firebasestorage.app",
+            messagingSenderId: "899696975212",
+            appId: "1:899696975212:web:3aa5337e8d6014de98a749"
+        };
+        firebase.initializeApp(firebaseConfig);
+        document.getElementById('logout').addEventListener('click', () => {
+            firebase.auth().signOut().then(() => window.location.href = "loginpage.html");
+        });
+    </script>
+</body>
+</html>
